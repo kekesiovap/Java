@@ -25,9 +25,9 @@ public class Database {
     }
 
     public void insertNewPerson(Person person) {
+        Connection conn = getConnection();
         try {
-            Connection conn = getConnection();
-            PreparedStatement stmt = conn.prepareStatement("INSET INTO person (name,surn,dob,rodnc) values(?,?,?,?)");
+            PreparedStatement stmt = conn.prepareStatement("INSERT INTO person (name,surn,dob,rodnc) values(?,?,?,?)");
             stmt.setString(1, person.getName());
             stmt.setString(2, person.getSurename());
             stmt.setDate(3, new Date(person.getDob().getTime()));
@@ -119,6 +119,32 @@ public class Database {
             }
         return persons;
    }
+
+    public List <Person> selectAllAdult(){
+        Connection conn = getConnection();
+        String query = "SELECT * FROM person WHERE dob < Current_date() - 18 ";
+        List <Person> persons = new ArrayList<>();
+
+        try {
+            PreparedStatement pst = null;
+            ResultSet rs = null;
+            pst = conn.prepareStatement(query);
+            rs = pst.executeQuery();
+            while (rs.next()) {
+                String surname = rs.getString("surn");
+                String firstName = rs.getString("name");
+                String pid = rs.getString("rodnc");
+                Date dob = rs.getDate("dob");
+                Person p4=new Person(surname,firstName,pid,dob);
+                persons.add(p4);
+            }
+        }
+        catch(SQLException e){
+            e.printStackTrace();
+        }
+
+        return persons;
+    }
 
     private void closeConnection(Connection conn) {
         if(conn!=null) {
